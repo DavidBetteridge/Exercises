@@ -72,5 +72,25 @@ namespace cryptopals
             var hammingDistance = differences.Sum(s => CountBits(s));
             return hammingDistance;
         }
+
+        internal IEnumerable<IEnumerable<byte>> SplitIntoBlocks(IEnumerable<byte> text, int keySize)
+        {
+            var offset = 0;
+            while (offset <= text.Count())
+            {
+                yield return text.Skip(offset).Take(keySize);
+                offset += keySize;
+            }
+        }
+
+        internal IEnumerable<IEnumerable<char>> SplitIntoBlocks(IEnumerable<char> text, int keySize)
+        {
+            var offset = 0;
+            while (offset <= text.Count())
+            {
+                yield return text.Skip(offset).Take(keySize);
+                offset += keySize;
+            }
+        }
     }
 }

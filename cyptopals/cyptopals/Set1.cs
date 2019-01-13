@@ -112,7 +112,7 @@ namespace cryptopals
 
             Assert.Equal(29, bestKeySize);
 
-            var blocks = SplitIntoBlocks(bytes, bestKeySize);
+            var blocks = solution.SplitIntoBlocks(bytes, bestKeySize);
             var key = "";
             for (int offset = 1; offset <= bestKeySize; offset++)
             {
@@ -143,15 +143,31 @@ namespace cryptopals
             Assert.StartsWith("I'm back and I'm ringin", plainText);
         }
 
-        private IEnumerable<IEnumerable<byte>> SplitIntoBlocks(IEnumerable<byte> text, int keySize)
+        [Fact]
+        public void Exercise8()
         {
-            var offset = 0;
-            while (offset <= text.Count())
+            var hexLines = File.ReadAllLines("FileForSet1_Exercise8.txt");
+            var results = new HashSet<int>();
+            var lineNumber = 0;
+            foreach (var hexLine in hexLines)
             {
-                yield return text.Skip(offset).Take(keySize);
-                offset += keySize;
+                for (int offset = 0; offset < hexLine.Length - 64; offset++)
+                {
+                    var lhs = hexLine.Substring(offset, 32);
+                    var index = hexLine.IndexOf(lhs, offset + 32);
+                    if (index >= 0 && ((index - offset) % 32 == 0)) results.Add(lineNumber);
+                }
+
+                lineNumber++;
             }
+            
+            Assert.Single(results);
+            Assert.Equal(132, results.First());
         }
+
+
+
+
 
         [Fact]
         public void HammingDistance()
