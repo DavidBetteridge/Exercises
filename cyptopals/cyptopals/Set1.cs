@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -79,5 +81,77 @@ namespace cryptopals
 
             Assert.Equal(expectedResult, actualResult);
         }
+
+        [Fact]
+        public void Exercise6()
+        {
+            var cyphertext = File.ReadAllText("FileForSet1_Exercise6.txt");
+            var bytes = Convert.FromBase64String(cyphertext);
+
+            var solution = new Solution();
+
+            var smallestDistance = double.MaxValue;
+            var bestKeySize = 0;
+            for (int keysize = 5; keysize <= 40; keysize++)
+            {
+                var first = bytes.Take(keysize);
+                var second = bytes.Skip(keysize * 1).Take(keysize);
+                var third = bytes.Skip(keysize * 2).Take(keysize);
+                var fourth = bytes.Skip(keysize * 3).Take(keysize);
+
+                var hammingDistance =
+                    ((solution.ComputeHammingDistance(first, second) / (double)keysize) +
+                    (solution.ComputeHammingDistance(second, third) / (double)keysize) +
+                    (solution.ComputeHammingDistance(third, fourth) / (double)keysize)) / 3;
+
+                if (hammingDistance < smallestDistance)
+                {
+                    smallestDistance = hammingDistance;
+                    bestKeySize = keysize;
+                }
+            }
+
+            Assert.Equal(29, bestKeySize);
+
+            var blocks = SplitIntoBlocks(bytes, bestKeySize);
+            var key = "";
+            for (int offset = 1; offset <= bestKeySize; offset++)
+            {
+                var block1 = blocks.Where(b => b.Count() >= offset).Select(b => b.Skip(offset - 1).First()).ToArray();
+                key += solution.SolveSingleXORKey(block1).Key;
+            }
+
+            var plainText =
+                         bytes.Select((c, offset) => (char)(c ^ key[offset % bestKeySize]))
+                         .ConcatStrings();
+
+            Assert.StartsWith("I'm back and I'm ringin' the bell", plainText);
+
+
+        }
+
+        private IEnumerable<IEnumerable<byte>> SplitIntoBlocks(IEnumerable<byte> text, int keySize)
+        {
+            var offset = 0;
+            while (offset <= text.Count())
+            {
+                yield return text.Skip(offset).Take(keySize);
+                offset += keySize;
+            }
+        }
+
+        [Fact]
+        public void HammingDistance()
+        {
+            var string1 = "this is a test";
+            var string2 = "wokka wokka!!!";
+
+            var solution = new Solution();
+            var hammingDistance = solution.ComputeHammingDistance(string1, string2);
+
+            Assert.Equal(37, hammingDistance);
+        }
+
+
     }
 }

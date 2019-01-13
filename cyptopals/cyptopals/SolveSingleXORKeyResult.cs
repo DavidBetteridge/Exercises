@@ -4,6 +4,7 @@
     {
         public string PlainText { get; set; }
         public int Score { get; set; }
+        public char Key { get;  set; }
     }
 
 }
