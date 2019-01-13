@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -121,6 +120,8 @@ namespace cryptopals
                 key += solution.SolveSingleXORKey(block1).Key;
             }
 
+            Assert.Equal("Terminator X: Bring the noise", key);
+
             var plainText =
                          bytes.Select((c, offset) => (char)(c ^ key[offset % bestKeySize]))
                          .ConcatStrings();
@@ -128,6 +129,18 @@ namespace cryptopals
             Assert.StartsWith("I'm back and I'm ringin' the bell", plainText);
 
 
+        }
+
+        [Fact]
+        public void Exercise7()
+        {
+            var base64 = File.ReadAllText("FileForSet1_Exercise7.txt");
+            var cipherText = Convert.FromBase64String(base64);
+            var key = "YELLOW SUBMARINE".Select(b => (byte)b).ToArray();
+
+            var aes = new AES();
+            var plainText = aes.DecryptStringFromBytes_Aes(cipherText, key);
+            Assert.StartsWith("I'm back and I'm ringin", plainText);
         }
 
         private IEnumerable<IEnumerable<byte>> SplitIntoBlocks(IEnumerable<byte> text, int keySize)
