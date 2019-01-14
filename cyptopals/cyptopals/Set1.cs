@@ -160,7 +160,7 @@ namespace cryptopals
 
                 lineNumber++;
             }
-            
+
             Assert.Single(results);
             Assert.Equal(132, results.First());
         }
